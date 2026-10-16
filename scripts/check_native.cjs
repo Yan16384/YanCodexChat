@@ -85,5 +85,7 @@ vm.runInContext(helper + '\nthis.answerTool=questionTool;this.appCall=callTool;'
   }
   await assert.rejects(context.appCall('send_message_to_thread', {threadId: 'session', prompt: 'test'}), /connection lost/);
   assert.equal(seen.filter(x => x.params?.tool === 'send_message_to_thread').length, 1);
+  await assert.rejects(context.appCall('create_thread', {prompt: 'first prompt', target: {type: 'projectless'}}), /connection lost/);
+  assert.equal(seen.filter(x => x.params?.tool === 'create_thread').length, 1);
   console.log('PASS: native start/steer, original answer as one text input, owner routing, fragmented frames, no automatic write retry');
 })().catch(error => { console.error(error); process.exitCode = 1; });

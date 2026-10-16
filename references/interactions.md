@@ -51,9 +51,14 @@ Use compact opaque callback keys under Telegram's 64-byte limit. Persist chat/us
 
 Keep the polling loop available during Codex work. Dispatch async answers outside the normal per-session turn-completion queue, serialize the short read-and-dispatch section, and deduplicate final delivery by chat/session/turn ID. Suppress final pushes after leaving or switching the target session. `/stop` leaves the binding; it does not interrupt a desktop task already dispatched.
 
+## Create a new desktop conversation
+
+The `/start` `开启新对话` action enters a persisted draft state. The following Telegram message is the creation tool's required `prompt`; it is not sent again through `send_message_to_thread`. Call `create_thread` with `{prompt, target:{type:"projectless"}}` and omit a model override. Bind the Telegram chat only when the response contains a formal `threadId`. A `clientThreadId` means setup is still pending and cannot be passed to read/send operations. Persist `creating`, `pending`, `created`, `cancelled`, and `uncertain` states; never retry a timed-out or disconnected creation write automatically. If a formal ID was returned but later observation fails, keep the ID for manual selection and do not create another thread. After binding, observe the initial turn and deliver its final reply through the normal deduplication path.
+
 ## Verification boundaries
 
 - `check_interactions.py`: isolated synthetic rollouts and SQLite, fake Telegram; no network or desktop writes.
+- `check_new_chat.py`: draft, owner, creation once, cancellation/switch, pending IDs, restart uncertainty and initial reply, with fake transport only.
 - `check_native.cjs`: in-memory framed pipe; checks original wrapper, owner/version routing, start/steer, fragmented frames and no write retries.
 - Native discovery: live initialize, owner and model-setting reads establish interface availability only.
 - Actual Telegram card delivery establishes rendering only. Confirm a human-selected answer appears as native input in the original desktop thread and dismisses the original card before reporting full round-trip completion. Never choose a personal option merely to validate delivery.

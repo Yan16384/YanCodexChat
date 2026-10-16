@@ -104,12 +104,15 @@ When verification is requested, run `python scripts/check_template.py` from the 
 
 For interaction changes, also run `python scripts/check_interactions.py` and `node scripts/check_native.cjs`. These check synthetic question records, owner/session binding, six-choice rendering, text/cancel/skip, stale and repeated buttons, restart uncertainty, native start/steer envelopes, and no automatic write retry. They perform no desktop writes. Report live interface discovery, real button delivery, and a human-selected answer round trip separately.
 
+For new-conversation changes, run `python scripts/check_new_chat.py` as well. It checks draft ownership, one-shot creation, binding on success, cancellation/switching, pending IDs, unknown outcomes, restart, and observing the first reply without resending its prompt. These use fake transport; a real creation and first-reply round trip must be reported separately.
+
 ## Telegram runtime behavior
 
 - Poll updates from the Telegram Bot API with one process only.
 - Reject every sender whose Telegram user ID is not in the allowlist.
 - Bind each allowlisted Telegram chat ID to a Codex thread and persist that binding and local message records in SQLite or the project's existing state store.
 - Keep menus for recent device chats, pinned chats, current chat, recent history, and help when the project already provides them.
+- Include an `开启新对话` action. Collect the next first message, call `create_thread` with a local projectless target, and bind only after a formal `threadId` is returned. Treat pending or unknown creation as one-shot and never retry automatically.
 - Show history as paired messages with blank lines, for example:
 
   ```text
@@ -169,6 +172,7 @@ Before delivery, verify or explicitly mark each item:
 - ordinary text and photo-plus-caption messages reach the selected desktop thread;
 - the corresponding Codex final reply returns to Telegram;
 - a desktop-only Codex message is not sent to Telegram automatically;
+- `/start` can create a new desktop conversation from the next Telegram message without sending that first message twice;
 - startup failures show an actionable diagnosis;
 - the BAT reports actual Telegram and Codex health checks.
 - default startup supplies a valid caller thread automatically without adding a configuration variable or changing the selected target;

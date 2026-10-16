@@ -34,6 +34,8 @@ def main() -> None:
         mod.__file__ = str(root / 'bridge.py')
         with patch.dict(os.environ, {'CODEX_BRIDGE_ROOT': str(root)}):
             exec(compile(code, '<bridge>', 'exec'), mod.__dict__)
+        assert any(button.get('callback_data', '').startswith('new:')
+                   for row in mod.menu_keyboard() for button in row), 'new-chat menu action missing'
         mod.CODEX_STATE_DB = root / 'codex.sqlite'
         rollout = root / 'rollout.jsonl'
         with contextlib.closing(sqlite3.connect(mod.CODEX_STATE_DB)) as conn:

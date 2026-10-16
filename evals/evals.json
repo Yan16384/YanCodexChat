@@ -54,6 +54,12 @@
       "prompt": "Telegram 选择题在 Codex 空闲时能答，但 Codex 仍在工作时点击会报 Cannot read properties of undefined (reading cwd)。请定位两条调用分支的参数差别，修复单 BAT 并更新技能，不要重放发送结果未知的旧答案。",
       "expected_output": "Inspect the native active-turn steering entry and include restoreMessage with id, answer text, nullable cwd and context; inherit the selected thread cwd. Verify idle and active branches separately, re-embed both payloads and update the native checker. Recover only a confirmed pre-dispatch rejection whose original question remains pending and whose saved selection is absent from native history; never replay superseded or unknown-outcome answers.",
       "files": []
+    },
+    {
+      "id": 10,
+      "prompt": "在 /start 增加开启新对话。点击后下一条文字或图片作为首条输入，在电脑端 Codex 创建并绑定。不要独立 CLI 会话，也不能重复发送首条消息。取消、切换和超时不要重复创建，并更新单文件及 skill。",
+      "expected_output": "Persist a draft after an authorized menu action, submit its first prompt once using local app-tools create_thread without model overrides, bind only a formal threadId, observe the initial reply without resending, and preserve selection on cancellation, pending or unknown results. Re-embed the implementation and refresh the same sanitized skill BAT; distinguish isolated lifecycle checks from a live first-turn round trip.",
+      "files": []
     }
   ]
 }
