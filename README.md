@@ -55,6 +55,8 @@ Codex 发出异步问题时，机器人会显示原题、各个选项按钮，�
 
 本版适配 `request_user_input_async` 问题卡，不包括工具执行审批、文件修改审批或阻塞式工具输入。只有手机发起的任务处理期间和主动查询时发现问题；不会持续监听并推送电脑端所有活动。
 
+v1.2.1 修复了“Codex 仍在工作时点击选项”报 `Cannot read properties of undefined (reading 'cwd')` 的问题：为原生 steering 请求补齐 `restoreMessage`，工作目录继续沿用所选会话。离线接口检查现包含此必需对象；单纯验证空闲会话提交不足以覆盖这个分支。
+
 ## 启动结果与日志
 
 BAT 会检查 Python、Node.js、Telegram Bot `getMe`、Codex app-tools 接口、polling 初始化和单实例锁。只有对应后台进程完成健康检查后才显示已启动。运行日志在 `logs\bridge.log` 和 `logs\bridge-error.log`，启动诊断在 `logs\launcher.log`，状态在 `runtime\health.json`，绑定记录在 `data\bridge.sqlite3`。
@@ -73,7 +75,7 @@ BAT 会检查 Python、Node.js、Telegram Bot `getMe`、Codex app-tools 接口�
 
 此次单文件改版已验证：从只含 BAT 的目录解包、中文和空格路径、从其他工作目录运行、关闭窗口后后台存活、重复启动拦截，以及仅有系统 PATH 时从官方站点自动下载和使用便携 Python / Node。打包检查使用模拟服务。后续修复了启动探测缺少会话 ID 的问题：现已在实际电脑通过 Telegram getMe、polling 初始化与 Codex list_threads 检查，并读到四个置顶对话；本次没有执行真实 Telegram 消息与 Codex 回复的完整收发验证。
 
-v1.2.0 已通过离线交互检查：六选项、短回调、用户/会话校验、防重复提交、文字/取消/跳过、桌面已回答失效处理、重启后的不确定状态，以及原生 start/steer 请求格式和写操作不重试。实际桌面已通过原生回答通道初始化、会话 owner 发现和模型设置读取，原会话的一道六选项问题已通过 Telegram API 成功发送为按钮卡。真人点击后，原问题消失并收到对应回复的完整链路仍需在目标电脑实际确认。开发检查命令为 `python scripts/check_template.py`、`python scripts/check_interactions.py`、`node scripts/check_native.cjs`；普通用户无需执行。
+v1.2.0 已通过离线交互检查：六选项、短回调、用户/会话校验、防重复提交、文字/取消/跳过、桌面已回答失效处理、重启后的不确定状态，以及原生 start/steer 请求格式和写操作不重试。实际桌面已通过原生回答通道初始化、会话 owner 发现和模型设置读取，原会话的一道六选项问题已通过 Telegram API 成功发送为按钮卡。随后实际用户连续两次选择均写入原桌面会话，并产生下一道问题；第三次点击发生在上一轮仍运行时，暴露了上述 steering 参数遗漏。v1.2.1 已加入该参数和对应检查，活动会话中的完整收发仍需实际点击确认。开发检查命令为 `python scripts/check_template.py`、`python scripts/check_interactions.py`、`node scripts/check_native.cjs`；普通用户无需执行。
 
 ## 安全提示
 

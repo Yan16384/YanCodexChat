@@ -36,12 +36,14 @@ The observed Windows endpoint is `\\.\pipe\codex-ipc`. Frame messages with four-
 2. Discover the owner with `thread-owner-discovery`, version 1, params `{hostId:"local", conversationId:target}`. Require the successful response's `handledByClientId` and compatible capability result.
 3. Set `targetClientId` to that owner for the write. Omit envelope `hostId` for local follower methods; supplying it changes the expected version.
 4. For an idle conversation use `thread-follower-start-turn`, version 2, params `{conversationId, turnStart:{request:{threadId, input, clientUserMessageId}, context:{inheritThreadSettings:true}}}`.
-5. For an active turn use `thread-follower-steer-turn`, version 1, params `{conversationId,input,clientUserMessageId}`.
+5. For an active turn use `thread-follower-steer-turn`, version 1, params `{conversationId,input,clientUserMessageId,restoreMessage}`. Include `restoreMessage={id:clientUserMessageId,text:wrapper,cwd:null,context:{}}`. The observed desktop implementation reads `restoreMessage.cwd` and `restoreMessage.context.workspaceRoots` before dispatch; omitting this object throws `Cannot read properties of undefined (reading 'cwd')`. A null cwd inherits the target desktop conversation; do not substitute the bridge directory or change the target workspace.
 6. `input` is a one-element array `{type:"text",text:wrapper,text_elements:[]}`. Generate a UUID for `clientUserMessageId`. Preserve the original thread's model, permissions and settings.
 
 Responses have `type=response`, matching `requestId`, `resultType=success|error`. Start/steer results are nested in `result.result`. Correlate the resulting turn ID; a steering answer may keep the active turn ID. Ignore unrelated broadcasts and reject client discovery requests with `canHandle:false`; the bridge must not claim ownership of any desktop conversation.
 
 Use bounded connection/request timeouts. Retry discovery and reads as appropriate, but not a write whose delivery may have occurred. A version or owner error must surface clearly instead of silently creating an independent CLI conversation.
+
+The missing-restoreMessage error was confirmed to occur before optimistic steering or backend dispatch. To recover an affected saved answer, first verify its original question ID is still pending and its answer is absent from the desktop history; only then explicitly requeue that user-selected answer. Do not apply this recovery to a timeout, disconnection or another unknown-outcome error.
 
 ## Callback state and concurrency
 

@@ -70,6 +70,8 @@ Read [references/interactions.md](references/interactions.md) when changing ques
 
 Keep Telegram polling responsive with background work. Async answers must bypass the queue waiting for the current turn to finish, so an active turn can accept steering input. Serialize dispatches, correlate resulting turns, and deduplicate final replies when both the original task and its answer observe the same turn.
 
+Active-turn steering requires a restore-message object with an ID, original answer text, nullable cwd and context. The bundled v1.2.1 BAT supplies it; the native checker rejects its omission. An idle-turn success does not validate active-turn steering. See the interaction reference before recovering a rejected submission; preserve the no-replay rule for unknown outcomes.
+
 Persist question ownership and state. Check the allowlist, chat, user, selected session, active binding, and current question again before dispatch. Expire questions answered on the desktop or superseded by a later batch. Accept one submission only; clear buttons after submission. Interrupted or timed-out writes have an uncertain result and must not replay automatically after retry or restart. Preserve histories and saved bindings.
 
 This implementation handles async question cards. Blocking tool-input requests and command/file/permission approvals have different request IDs and protocols; add explicit support and validation before claiming those are covered. Internal native IPC compatibility must be checked on the installed desktop version.

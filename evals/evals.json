@@ -48,6 +48,12 @@
       "prompt": "我点了机器人旧问题的按钮，当时已经切换到另一个会话；另一个按钮点了两次。还有一次回答刚发送就断线重启了。请检查不能误发、重复提交或自动重放。电脑端已回答的问题也应该失效。",
       "expected_output": "Check chat/user/session/active binding and original question freshness before dispatch; reject repeat and desktop-answered callbacks; persist question state; never retry or replay an uncertain write; prevent duplicate final replies when an active turn is steered.",
       "files": []
+    },
+    {
+      "id": 9,
+      "prompt": "Telegram 选择题在 Codex 空闲时能答，但 Codex 仍在工作时点击会报 Cannot read properties of undefined (reading cwd)。请定位两条调用分支的参数差别，修复单 BAT 并更新技能，不要重放发送结果未知的旧答案。",
+      "expected_output": "Inspect the native active-turn steering entry and include restoreMessage with id, answer text, nullable cwd and context; inherit the selected thread cwd. Verify idle and active branches separately, re-embed both payloads and update the native checker. Recover only a confirmed pre-dispatch rejection whose original question remains pending and whose saved selection is absent from native history; never replay superseded or unknown-outcome answers.",
+      "files": []
     }
   ]
 }

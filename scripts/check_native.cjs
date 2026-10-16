@@ -34,6 +34,15 @@ class Socket extends EventEmitter {
         else {
           assert.equal(message.targetClientId, 'desktop-owner');
           assert.equal(message.version, message.method === 'thread-follower-start-turn' ? 2 : 1);
+          if (message.method === 'thread-follower-steer-turn') {
+            // Desktop Ij() reads restoreMessage.cwd and
+            // restoreMessage.context.workspaceRoots before any dispatch.
+            assert.ok(message.params.restoreMessage, 'Active-turn answer omitted restoreMessage');
+            assert.ok(message.params.restoreMessage.context, 'Active-turn answer omitted restore context');
+            assert.equal(message.params.restoreMessage.cwd, null, 'Use desktop cwd fallback instead of a bridge folder');
+            assert.equal(message.params.restoreMessage.id, message.params.clientUserMessageId);
+            assert.equal(message.params.restoreMessage.text, message.params.input[0].text);
+          }
           result = {result: {turn: {id: 'verified-turn'}}};
         }
       }
