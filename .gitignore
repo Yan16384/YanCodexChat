@@ -1,0 +1,23 @@
+# Runtime state and local credentials
+bridge.sqlite3
+bridge.lock
+bridge.pid
+bridge.log
+bridge-error.log
+codex-*.log
+bridge.sqlite3-journal
+bridge.sqlite3-wal
+bridge.sqlite3-shm
+
+# Runtime directories
+data/
+runtime/
+logs/
+telegram_media/
+
+# Python and local caches
+__pycache__/
+*.py[cod]
+.venv/
+venv/
+.env
