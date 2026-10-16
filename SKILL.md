@@ -10,7 +10,7 @@ Build a local Windows service in which Telegram is only the phone-side input and
 
 ## Reuse the implementation
 
-When `assets/CodexChat.bat` is bundled with this skill, copy that BAT as the deployment template. In the source repository, use the root `CodexChat.bat`. Preserve its embedded payloads and two-variable configuration contract. Decode embedded code when inspection is required, then regenerate the payload after changing it. The template's packaging and runtime preparation were checked with a simulated backend; real desktop-interface compatibility and Telegram forwarding still require verification on the target machine.
+When `assets/CodexChat.bat` is bundled with this skill, copy that BAT as the deployment template. In the source repository, use the root `CodexChat.bat`. Preserve its embedded payloads and two-variable configuration contract. Decode embedded code when inspection is required, then regenerate the payload after changing it. The bundled template includes the caller-thread bootstrap fix below. Real desktop list/read compatibility and full Telegram forwarding require separate verification on the target machine; a packaging simulation establishes neither.
 
 ## Deployment contract
 
@@ -65,6 +65,26 @@ Use the computer's already-running Codex desktop service. The existing implement
 Do not use Computer Use, screen clicking, remote window control, or `codex exec resume` for the normal existing-session path. Do not create or switch to a new Codex conversation automatically. If the desktop interface is unavailable, report that clearly and preserve the selected session binding.
 
 The internal desktop app-tools transport is distinct from the public Codex App Server protocol. Public App Server documentation does not establish that desktop app-tools calls are supported. Verify the actual installed interface and response shape before claiming the bridge works; do not substitute a separate CLI conversation when the desktop interface is unavailable.
+
+### Required startup context and error diagnosis
+
+The observed desktop interface validates the caller's `threadId` even for the read-only `list_threads` probe. An empty ID returned JSON-RPC `-32602` with `Invalid app tool request` while the pipe was present and the desktop was running. The same pipe accepted the probe with an existing local thread ID. Apply these requirements to every generated bridge:
+
+1. Resolve a nonempty caller thread before launching the Node helper. Use the requested existing session when present; otherwise read an existing, unarchived local thread ID from the current user's Codex state database in read-only mode. Inspect available columns before ordering by timestamps; handle schema differences explicitly. Discover the current user's paths instead of copying a developer's ID or directory.
+2. Keep the bootstrap caller separate from the Telegram chat's selected target. Startup discovery must not create a conversation, change a saved binding, or require a third BAT variable such as `CODEX_TG_SESSION`.
+3. If no existing conversation is available, say that startup needs an existing desktop conversation and ask the user to create one in the desktop app and retry. An unreadable database or unsupported schema needs its own diagnosis; neither proves the desktop is closed.
+4. Retain the candidate pipe's JSON-RPC error code and sanitized message when diagnosing a failed probe. Distinguish no matching pipe, connection failure, invalid request parameters, and tool-call failure. A pipe returning `-32602` is reachable: inspect caller context and request shape before telling the user to restart Codex or reinstall runtimes.
+5. Accept a probe only after a successful app-tools response with a parseable expected payload. A pipe existing or a Python process starting is insufficient. A successful `list_threads` probe establishes list access only; verify reads and message delivery separately.
+
+### Prevent recurrence when packaging
+
+- Exercise the default deployment with no inherited session variable: only the two user-editable BAT values may be required. A run that succeeds only after manually setting a session ID fails this deployment contract.
+- Check that cold-start caller selection leaves saved Telegram bindings unchanged and handles the absence of any Codex conversation with the explicit diagnosis above. Use synthetic databases for schema variants when verification is authorized.
+- Re-embed every modified source into the BAT before delivery. Decode the final BAT and compare its payload to the fixed source; editing `runtime/embedded/bridge.py` alone is temporary and the next launch can overwrite it.
+- Bundle a sanitized copy of that same BAT in `assets/CodexChat.bat` when producing the `.skill`. Compare the packaged asset and public BAT bytes, and scan decoded payloads as well as visible text for credentials. A correct instruction document with an outdated bundled launcher is an incomplete update.
+- Report packaging checks, real desktop list/read checks, and Telegram-to-Codex round-trip checks separately. Record unavailable checks as unverified; never promote a simulated health result into a real forwarding claim.
+
+When verification is requested, run `python scripts/check_template.py` from the skill or source repository. The script reads the bundled BAT (or repository-root BAT), decodes and checks its public payloads, and exercises caller discovery with temporary synthetic databases and a mocked helper. It covers default startup without a session variable, saved-binding preservation, explicit targets, timestamp variants and no existing conversation. It performs no Telegram calls or desktop writes. A passing result does not establish real forwarding; perform live checks separately when authorized. Pass an explicit BAT path to inspect a different public template.
 
 ## Telegram runtime behavior
 
@@ -133,3 +153,6 @@ Before delivery, verify or explicitly mark each item:
 - a desktop-only Codex message is not sent to Telegram automatically;
 - startup failures show an actionable diagnosis;
 - the BAT reports actual Telegram and Codex health checks.
+- default startup supplies a valid caller thread automatically without adding a configuration variable or changing the selected target;
+- an invalid app-tools request is diagnosed separately from an absent desktop pipe;
+- the packaged `.skill` contains the corrected BAT payload and its public copy uses placeholders.

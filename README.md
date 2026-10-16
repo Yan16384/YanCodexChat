@@ -25,6 +25,12 @@ BAT 路径可以包含中文、空格，文件可复制到其他目录或盘符�
 
 填写 Token 后不要公开分享这个 BAT。仓库中的 BAT 只有占位符。
 
+## YanCodexChat skill
+
+普通用户只需使用 BAT。需要让 Codex 复用部署和修复方法时，可在 [Releases](https://github.com/Yan16384/YanCodexChat/releases) 下载 `yancodexchat.skill`；其中附带同版、未填写凭证的 `assets/CodexChat.bat`。
+
+新版 skill 明确要求：启动探测先自动取得已有本机会话 ID，启动上下文不改变 Telegram 目标绑定；`Invalid app tool request` 等参数错误不能误报为“桌面未运行”；修改代码后必须同时刷新 BAT 和 skill 内的 BAT。开发者可运行 `python scripts/check_template.py` 检查内嵌代码、凭证占位符及模拟状态库中的启动逻辑。此检查不会发送 Telegram 消息，也不代表完整收发验证已通过。
+
 ## Telegram 操作
 
 发送 `/start` 打开菜单：

@@ -1,0 +1,41 @@
+{
+  "skill_name": "yancodexchat",
+  "evals": [
+    {
+      "id": 1,
+      "prompt": "我有一个 Windows Python Telegram-Codex 桥接项目，当前需要 .env、两个 BAT 和手动安装依赖。请把它整理成新用户只编辑一个 BAT 顶部的 TELEGRAM_BOT_TOKEN 和 ALLOWED_USER_ID，然后双击即可启动，并保留现有 Codex 桌面会话。",
+      "expected_output": "A plan or implementation that has one public BAT, no additional manual configuration, automatic checks, path-independent startup, token redaction, and the existing desktop-session transport preserved.",
+      "files": []
+    },
+    {
+      "id": 2,
+      "prompt": "现有桥接可以转发纯文字，但图片加文字会被忽略；它还用 codex exec resume 导致电脑桌面会话写入锁冲突。请修复成 Telegram 只做转发、消息进入正在运行的 Codex 桌面原对话，并要求最终仍只有一个 BAT 给新用户使用。",
+      "expected_output": "A fix that uses the desktop local app-tools interface, handles Telegram photo plus caption messages, keeps the selected session and history, prevents duplicate polling, and documents one-BAT deployment.",
+      "files": []
+    },
+    {
+      "id": 3,
+      "prompt": "请检查一个复制到 D:\\项目\\我的桥接\\ 的 Codex Telegram 项目是否满足最终交付：用户只改 BAT 中两个变量，路径换到别的盘符仍能启动，日志不泄露 Token，启动时能验证 Telegram Bot 和 Codex 接口，已有服务不会启动第二个实例。",
+      "expected_output": "A concrete acceptance review with path, credential, health-check, and single-instance findings, plus only actionable changes needed to meet the single-BAT contract.",
+      "files": []
+    },
+    {
+      "id": 4,
+      "prompt": "我只改了单文件 BAT 的 Token 和用户 ID。Codex 正在运行，能找到 codex-app-tools 管道，但启动报找不到桌面接口。只读探测实际返回 -32602 Invalid app tool request；传入已有会话 ID 后 list_threads 成功。请修复并更新 skill，不要增加第三个配置，也不要改变 Telegram 原来的绑定。",
+      "expected_output": "Resolve a valid existing local caller thread automatically before starting the helper; keep caller context separate from the selected target; retain the actual JSON-RPC error; re-embed the fix and refresh the skill's sanitized BAT asset; distinguish list access from full forwarding validation.",
+      "files": []
+    },
+    {
+      "id": 5,
+      "prompt": "新电脑第一次打开 Codex，状态库没有任何已有对话。桥接健康检查失败。请按 YanCodexChat 的单 BAT 要求处理，并说明状态库没有预期时间字段时怎么处理。",
+      "expected_output": "Inspect available schema fields and diagnose an absent conversation or incompatible schema precisely; instruct the user to create a desktop conversation and retry when none exists; do not silently create a separate chat, hardcode a developer session, or require another BAT setting.",
+      "files": []
+    },
+    {
+      "id": 6,
+      "prompt": "修好了 runtime 里的 Python，文档也写了已修复；现在帮我发布新的 YanCodexChat skill，注意旧 skill 内嵌 BAT 还没有更新。模拟启动通过，真实 list_threads 通过，但 Telegram 完整收发还没做。",
+      "expected_output": "Regenerate the BAT's embedded payload, package the same credential-free BAT inside the skill, check decoded payload and packaged/public byte equality, and report full Telegram round-trip as unverified rather than claiming full success.",
+      "files": []
+    }
+  ]
+}
