@@ -121,7 +121,33 @@ def main() -> None:
             assert len(queued) == count, 'Desktop-answered question was dispatched'
             assert '<send_user_message_question_reply>' not in mod.clean_history_text(native)
             assert 'desktop answer' in mod.clean_history_text(native)
+
+            for accepted in (True, False):
+                write([question('call_accepted' if accepted else 'call_unknown')])
+                bridge.show(10, 20, 'session')
+                key = telegram.sent[-1][2][0][0]['callback_data'].split(':')[1]
+                bridge.answer(10, 20, key, '0')
+                chat, user, session, prompt, queued_key = queued[-1]
+                jobs = mod.queue.Queue()
+                jobs.put((chat, user, prompt, queued_key))
+
+                def fail_after_dispatch(session, prompt, progress, is_answer, on_accepted):
+                    if accepted:
+                        on_accepted()
+                    raise RuntimeError('provider stream overloaded')
+
+                with patch.object(mod, 'run_desktop_codex', side_effect=fail_after_dispatch):
+                    bridge._worker(session, jobs, True)
+                with contextlib.closing(mod.db()) as conn:
+                    state = conn.execute('SELECT status FROM questions WHERE key=?', (key,)).fetchone()[0]
+                assert state == ('answered' if accepted else 'uncertain')
+                error_text = telegram.sent[-1][1]
+                if accepted:
+                    assert '\u5df2\u9001\u8fbe' in error_text and '\u53ef\u80fd\u5df2\u9001\u8fbe' not in error_text
+                else:
+                    assert '\u53ef\u80fd\u5df2\u9001\u8fbe' in error_text
         print('PASS: six options, compact callbacks, owner and session checks, original IDs, duplicate prevention, text/cancel/skip, desktop answers, restart uncertainty, readable history')
+        print('PASS: accepted answers retain delivered state after model failure; unconfirmed submissions remain uncertain')
 
 
 if __name__ == '__main__':

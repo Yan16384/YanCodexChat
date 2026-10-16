@@ -57,6 +57,8 @@ Codex 发出异步问题时，机器人会显示原题、各个选项按钮，�
 
 v1.2.1 修复了“Codex 仍在工作时点击选项”报 `Cannot read properties of undefined (reading 'cwd')` 的问题：为原生 steering 请求补齐 `restoreMessage`，工作目录继续沿用所选会话。离线接口检查现包含此必需对象；单纯验证空闲会话提交不足以覆盖这个分支。
 
+v1.2.2 区分“答案未确认送达”和“答案已送达，但后续模型回复失败”。服务器过载或回复流中断发生在桌面接受之后时，会明确提示答案已经送达，无需重复点击，避免把后续模型故障误报为发送结果未知。
+
 ## 启动结果与日志
 
 BAT 会检查 Python、Node.js、Telegram Bot `getMe`、Codex app-tools 接口、polling 初始化和单实例锁。只有对应后台进程完成健康检查后才显示已启动。运行日志在 `logs\bridge.log` 和 `logs\bridge-error.log`，启动诊断在 `logs\launcher.log`，状态在 `runtime\health.json`，绑定记录在 `data\bridge.sqlite3`。

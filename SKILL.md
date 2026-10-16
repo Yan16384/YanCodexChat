@@ -74,6 +74,8 @@ Active-turn steering requires a restore-message object with an ID, original answ
 
 Persist question ownership and state. Check the allowlist, chat, user, selected session, active binding, and current question again before dispatch. Expire questions answered on the desktop or superseded by a later batch. Accept one submission only; clear buttons after submission. Interrupted or timed-out writes have an uncertain result and must not replay automatically after retry or restart. Preserve histories and saved bindings.
 
+Distinguish submission failure from a later model failure: once native acceptance has been recorded, an overload or stream error means the answer was delivered but the subsequent reply failed. Keep that accepted state and tell the user not to click the option again; reserve uncertain-delivery wording for submissions without confirmation.
+
 This implementation handles async question cards. Blocking tool-input requests and command/file/permission approvals have different request IDs and protocols; add explicit support and validation before claiming those are covered. Internal native IPC compatibility must be checked on the installed desktop version.
 
 Do not use Computer Use, screen clicking, remote window control, or `codex exec resume` for the normal existing-session path. Do not create or switch to a new Codex conversation automatically. If the desktop interface is unavailable, report that clearly and preserve the selected session binding.
