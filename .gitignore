@@ -21,3 +21,7 @@ __pycache__/
 .venv/
 venv/
 .env
+
+# The public distribution is intentionally the embedded BAT only.
+bridge.py
+app_tools_client.cjs
