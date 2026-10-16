@@ -53,7 +53,7 @@ BAT 会检查 Python、Node.js、Telegram Bot `getMe`、Codex app-tools 接口�
 
 本项目沿用已有的 Codex 桌面 app-tools 管道协议，它依赖安装版本实际开放该接口，不是公开稳定的 Codex App Server 协议。若提示“找不到 Codex 桌面本地接口”，本版本不能在该桌面环境下转发，重新填写 Token 也不能解决此接口兼容问题。
 
-此次单文件改版已验证：从只含 BAT 的目录解包、中文和空格路径、从其他工作目录运行、关闭窗口后后台存活、重复启动拦截，以及仅有系统 PATH 时从官方站点自动下载和使用便携 Python / Node。后台健康检查使用模拟服务；当前机器未能通过真实 Codex 管道探测，本次没有执行真实 Telegram / Codex 收发验证。
+此次单文件改版已验证：从只含 BAT 的目录解包、中文和空格路径、从其他工作目录运行、关闭窗口后后台存活、重复启动拦截，以及仅有系统 PATH 时从官方站点自动下载和使用便携 Python / Node。打包检查使用模拟服务。后续修复了启动探测缺少会话 ID 的问题：现已在实际电脑通过 Telegram getMe、polling 初始化与 Codex list_threads 检查，并读到四个置顶对话；本次没有执行真实 Telegram 消息与 Codex 回复的完整收发验证。
 
 ## 安全提示
 
