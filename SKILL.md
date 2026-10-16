@@ -62,6 +62,18 @@ Use the computer's already-running Codex desktop service. The existing implement
 - use `send_message_to_thread` to send a Telegram prompt and `read_thread` to observe the new turn and retrieve the final agent message;
 - serialize requests per target chat and wait for an in-progress turn rather than mixing replies from different turns.
 
+### Async question interaction
+
+When a desktop conversation uses `request_user_input_async`, show the actual question and all choices as Telegram inline buttons, plus free-text and skip actions. Add `/questions` and a menu entry to recover an existing question; `/cancel` cancels free-text entry. Only discover questions automatically during a Telegram-originated task or an explicit session/question read, preserving the desktop-only notification policy.
+
+Read [references/interactions.md](references/interactions.md) when changing question extraction, native answer transport, callback state, or reply correlation. The desktop `read_thread` projection can flatten question cards into plain text. Keep the original tool-call ID and question index from the local rollout; the native answer must be a single text input containing the original `questionItemId`. Ordinary app-tools delegation of that wrapper does not establish that the desktop card was answered.
+
+Keep Telegram polling responsive with background work. Async answers must bypass the queue waiting for the current turn to finish, so an active turn can accept steering input. Serialize dispatches, correlate resulting turns, and deduplicate final replies when both the original task and its answer observe the same turn.
+
+Persist question ownership and state. Check the allowlist, chat, user, selected session, active binding, and current question again before dispatch. Expire questions answered on the desktop or superseded by a later batch. Accept one submission only; clear buttons after submission. Interrupted or timed-out writes have an uncertain result and must not replay automatically after retry or restart. Preserve histories and saved bindings.
+
+This implementation handles async question cards. Blocking tool-input requests and command/file/permission approvals have different request IDs and protocols; add explicit support and validation before claiming those are covered. Internal native IPC compatibility must be checked on the installed desktop version.
+
 Do not use Computer Use, screen clicking, remote window control, or `codex exec resume` for the normal existing-session path. Do not create or switch to a new Codex conversation automatically. If the desktop interface is unavailable, report that clearly and preserve the selected session binding.
 
 The internal desktop app-tools transport is distinct from the public Codex App Server protocol. Public App Server documentation does not establish that desktop app-tools calls are supported. Verify the actual installed interface and response shape before claiming the bridge works; do not substitute a separate CLI conversation when the desktop interface is unavailable.
@@ -85,6 +97,8 @@ The observed desktop interface validates the caller's `threadId` even for the re
 - Report packaging checks, real desktop list/read checks, and Telegram-to-Codex round-trip checks separately. Record unavailable checks as unverified; never promote a simulated health result into a real forwarding claim.
 
 When verification is requested, run `python scripts/check_template.py` from the skill or source repository. The script reads the bundled BAT (or repository-root BAT), decodes and checks its public payloads, and exercises caller discovery with temporary synthetic databases and a mocked helper. It covers default startup without a session variable, saved-binding preservation, explicit targets, timestamp variants and no existing conversation. It performs no Telegram calls or desktop writes. A passing result does not establish real forwarding; perform live checks separately when authorized. Pass an explicit BAT path to inspect a different public template.
+
+For interaction changes, also run `python scripts/check_interactions.py` and `node scripts/check_native.cjs`. These check synthetic question records, owner/session binding, six-choice rendering, text/cancel/skip, stale and repeated buttons, restart uncertainty, native start/steer envelopes, and no automatic write retry. They perform no desktop writes. Report live interface discovery, real button delivery, and a human-selected answer round trip separately.
 
 ## Telegram runtime behavior
 
@@ -156,3 +170,6 @@ Before delivery, verify or explicitly mark each item:
 - default startup supplies a valid caller thread automatically without adding a configuration variable or changing the selected target;
 - an invalid app-tools request is diagnosed separately from an absent desktop pipe;
 - the packaged `.skill` contains the corrected BAT payload and its public copy uses placeholders.
+- async question choices, free-text and skip keep the original question ID; stale or repeated buttons cannot dispatch another answer;
+- answers can be received while Codex works, and an uncertain write is not automatically retried;
+- real question rendering and original-card answer completion are distinguished from offline checks.

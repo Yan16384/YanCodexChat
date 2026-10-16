@@ -36,6 +36,18 @@
       "prompt": "修好了 runtime 里的 Python，文档也写了已修复；现在帮我发布新的 YanCodexChat skill，注意旧 skill 内嵌 BAT 还没有更新。模拟启动通过，真实 list_threads 通过，但 Telegram 完整收发还没做。",
       "expected_output": "Regenerate the BAT's embedded payload, package the same credential-free BAT inside the skill, check decoded payload and packaged/public byte equality, and report full Telegram round-trip as unverified rather than claiming full success.",
       "files": []
+    },
+    {
+      "id": 7,
+      "prompt": "电脑 Codex 有六选项的问题卡，Telegram 只收到已发出选择题的文字，没有按钮。请支持选项点击、自己输入和跳过，并让回答进入电脑端原问题。不要用远程点击，更新单 BAT 和同版 skill。",
+      "expected_output": "Recover original async question IDs from the rollout, render compact Telegram buttons and free-text/skip, deliver one native user input through the desktop owner, keep polling responsive, re-embed and package the same sanitized BAT, and distinguish live discovery/rendering from human-selected round-trip completion.",
+      "files": []
+    },
+    {
+      "id": 8,
+      "prompt": "我点了机器人旧问题的按钮，当时已经切换到另一个会话；另一个按钮点了两次。还有一次回答刚发送就断线重启了。请检查不能误发、重复提交或自动重放。电脑端已回答的问题也应该失效。",
+      "expected_output": "Check chat/user/session/active binding and original question freshness before dispatch; reject repeat and desktop-answered callbacks; persist question state; never retry or replay an uncertain write; prevent duplicate final replies when an active turn is steered.",
+      "files": []
     }
   ]
 }

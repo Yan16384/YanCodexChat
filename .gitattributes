@@ -1,2 +1,2 @@
 # Preserve the exact Windows batch bytes for direct downloads from GitHub.
-CodexChat.bat -text
+CodexChat.bat -text whitespace=cr-at-eol
